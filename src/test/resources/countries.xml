@@ -1,0 +1,18 @@
+<catalog>
+  <country code="CA">
+    <name>Canada</name>
+    <capital>Ottawa</capital>
+  </country>
+  <country code="GL">
+    <name>Greenland</name>
+    <capital>Nuuk</capital>
+  </country>
+  <country code="MX">
+    <name>Mexico</name>
+    <capital>Mexico City</capital>
+  </country>
+  <country code="US">
+    <name>United States</name>
+    <capital>Washington</capital>
+  </country>
+</catalog>

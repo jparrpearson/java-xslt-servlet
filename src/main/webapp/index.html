@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>XSLT Tester</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <style>
+            .xml {
+                font-family: monospace;
+            }
+
+            .inline-element {
+                margin: 0px 15px;
+            }
+
+            .name, .value {
+                width: 300px !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3>XSLT Tester</h3>
+                </div>
+                <div class="panel-body">
+                    <form id="xslt-form" method="POST" encType="multipart/form-data" action="execute">
+                        <div class="row">
+                            <div class="form-group col-sm-6">
+                                <div class="form-inline">
+                                    <label for="source" class="control-label">Source Document</label>
+                                    <div class="form-group form-group-sm">
+                                        <select id="source-format" class="form-control inline-element">
+                                            <option value="text" selected>Text</option>
+                                            <option value="file">File</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <div class="form-inline">
+                                    <label for="stylesheet" class="control-label">Stylesheet</label>
+                                    <div class="form-group form-group-sm">
+                                        <select id="stylesheet-format" class="form-control inline-element">
+                                            <option value="text" selected>Text</option>
+                                            <option value="file">File</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div id="source-container" class="form-group col-sm-6"></div>
+                            <div id="stylesheet-container" class="form-group col-sm-6"></div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12">
+                                <div class="form-inline">
+                                    <label for="result-format" class="control-label">Result Output</label>
+                                    <div class="form-group form-group-sm">
+                                        <select id="result-format" class="form-control inline-element">
+                                            <option value="text" selected>Text</option>
+                                            <option value="browser">Browser</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12">
+                                <div class="form-group">
+                                    <button type="button" id="add-parameter" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Parameter</button>
+                                </div>
+                                <div class="col-sm-offset-1">
+                                    <div id="parameters"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <button type="submit" class="btn btn-primary">Execute</button>
+                                <button type="reset" class="btn btn-default">Reset</button>
+                            </div>
+                        </div>
+                    </form>
+                <hr>
+                <form>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <label for="result" class="control-label">Result Document</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <textarea class="form-control xml" id="result" rows="20"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <script type="text/template" id="source-text">
+            <textarea class="form-control xml" id="source" name="source" rows="20"></textarea>
+        </script>
+        <script type="text/template" id="source-file">
+            <input type="file" class="form-control" id="source" name="source">
+        </script>
+        <script type="text/template" id="stylesheet-text">
+            <textarea class="form-control xml" id="stylesheet" name="stylesheet" rows="20" required></textarea>
+        </script>
+        <script type="text/template" id="stylesheet-file">
+            <input type="file" class="form-control" id="stylesheet" name="stylesheet" required>
+        </script>
+        <script type="text/template" id="parameter-group">
+            <div class="form-group parameter">
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" class="form-control inline-element name">
+                    </div>
+                    <div class="form-group">
+                        <label>Value</label>
+                        <input type="text" class="form-control inline-element value">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-default remove-parameter"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span> Remove</button>
+                </div>
+            </div>
+        </script>
+        <script type="text/template" id="source-example">
+<catalog>
+  <country code="CA">
+    <name>Canada</name>
+    <capital>Ottawa</capital>
+  </country>
+  <country code="GL">
+    <name>Greenland</name>
+    <capital>Nuuk</capital>
+  </country>
+  <country code="MX">
+    <name>Mexico</name>
+    <capital>Mexico City</capital>
+  </country>
+  <country code="US">
+    <name>United States</name>
+    <capital>Washington</capital>
+  </country>
+</catalog>
+        </script>
+        <script type="text/template" id="stylesheet-example">
+<xsl:stylesheet version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  exclude-result-prefixes="xsl xsd">
+
+  <xsl:output method="html" indent="yes" />
+
+  <xsl:param name="note" />
+
+  <xsl:template match="/">
+    <html>
+      <body>
+        <h1>Countries</h1>
+        <table style="border: 1px solid black; border-collapse: collapse; text-align: left;" cellpadding="10px">
+          <thead>
+            <tr style="color: white; background-color: green;">
+              <th>Name</th>
+              <th>Capital</th>
+              <th>Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <xsl:apply-templates />
+          </tbody>
+        </table>
+        <xsl:if test="$note">
+          <p>Note: <xsl:value-of select="$note" /></p>
+        </xsl:if>
+      </body>
+    </html>
+  </xsl:template>
+
+  <xsl:template match="country">
+    <tr>
+      <td><xsl:value-of select="name" /></td>
+      <td><xsl:value-of select="capital" /></td>
+      <td><xsl:value-of select="@code" /></td>
+    </tr>
+  </xsl:template>
+
+</xsl:stylesheet>
+        </script>
+        <script>
+            $(function() {
+                // Load inputs and outputs from local storage
+                if (localStorage.getItem("source-format")) {
+                    $("#source-format").val(localStorage.getItem("source-format"));
+                }
+                if (localStorage.getItem("stylesheet-format")) {
+                    $("#stylesheet-format").val(localStorage.getItem("stylesheet-format"));
+                }
+                if (localStorage.getItem("result-format")) {
+                    $("#result-format").val(localStorage.getItem("result-format"));
+                }
+
+                // Handle inputs
+                $("#source-format").on("change", changeSourceFormat).change();
+                $("#source-container").on("change", "#source", changeSource);
+                $("#stylesheet-format").on("change", changeStylesheetFormat).change();
+                $("#stylesheet-container").on("change", "#stylesheet", changeStylesheet);
+                $("#result-format").on("change", changeResultFormat);
+
+                // Handle parameters
+                $("#add-parameter").on("click", addParameter);
+                $("#parameters").on("click", ".remove-parameter", removeParameter);
+                $("#parameters").on("change", ".name", updateParameterName);
+                $("#parameters").on("change", ".value", updateParameterValue);
+
+                // Load parameters from local storage
+                if (localStorage.getItem("xslt-parameters")) {
+                    var parameters = JSON.parse(localStorage.getItem("xslt-parameters"));
+                    $.each(parameters, function(name, value) {
+                        $("#add-parameter").click();
+                        var parameter = $("#parameters .parameter:last");
+                        $(parameter).find(".value").val(value);
+                        $(parameter).find(".name").val(name).change();
+                    });
+                }
+
+                // Handle form submit/reset
+                $("#xslt-form").on("submit", submitXsltForm);
+                $("#xslt-form").on("reset", resetXsltForm);
+            });
+
+            function changeSourceFormat() {
+                var selected = $(this).val();
+                // Save input format to local storage
+                localStorage.setItem("source-format", selected);
+                if (selected === "file") {
+                    $("#source-container").empty().append($("#source-file").html());
+                } else {
+                    $("#source-container").empty().append($("#source-text").html());
+                    // Load input text from local storage
+                    if (localStorage.getItem("source-text")) {
+                        $("#source").val(localStorage.getItem("source-text"));
+                    } else {
+                        $("#source").val($("#source-example").text().trim());
+                    }
+                }
+            }
+
+            function changeStylesheetFormat() {
+                var selected = $(this).val();
+                // Save input format to local storage
+                localStorage.setItem("stylesheet-format", selected);
+                if (selected === "file") {
+                    $("#stylesheet-container").empty().append($("#stylesheet-file").html());
+                } else {
+                    $("#stylesheet-container").empty().append($("#stylesheet-text").html());
+                    // Load input text from local storage
+                    if (localStorage.getItem("stylesheet-text")) {
+                        $("#stylesheet").val(localStorage.getItem("stylesheet-text"));
+                    } else {
+                        $("#stylesheet").val($("#stylesheet-example").text().trim());
+                    }
+                }
+            }
+
+            function changeSource() {
+                // Save input text to local storage
+                if ($(this).prop("type") !== "file") {
+                    localStorage.setItem("source-text", $(this).val());
+                }
+            }
+
+            function changeStylesheet() {
+                // Save input text to local storage
+                if ($(this).prop("type") !== "file") {
+                    localStorage.setItem("stylesheet-text", $(this).val());
+                }
+            }
+
+            function changeResultFormat() {
+                var selected = $(this).val();
+                // Save result format to local storage
+                localStorage.setItem("result-format", selected);
+            }
+
+            function addParameter() {
+                $("#parameters").append($("#parameter-group").html());
+            }
+
+            function removeParameter() {
+                // Remove parameter from local storage
+                var nameElem = $(this).closest(".parameter").find(".name");
+                var name = $(nameElem).val();
+                if (localStorage.getItem("xslt-parameters")) {
+                    var parameters = JSON.parse(localStorage.getItem("xslt-parameters"));
+                    $.each(parameters, function(n, v) {
+                        if (n === name) {
+                            delete parameters[n];
+                            return false;
+                        }
+                    });
+                    localStorage.setItem("xslt-parameters", JSON.stringify(parameters));
+                }
+                $(this).closest(".parameter").remove();
+            }
+
+            function updateParameterName() {
+                var name = $(this).val();
+                var valueElem = $(this).closest(".parameter").find(".value");
+                $(valueElem).attr("name", name);
+                var value = $(valueElem).val();
+                updateParameter(name, value);
+            }
+
+            function updateParameterValue() {
+                var value = $(this).val();
+                var nameElem = $(this).closest(".parameter").find(".name");
+                var name = $(nameElem).val();
+                updateParameter(name, value);
+            }
+
+            function updateParameter(name, value) {
+                if (!name) {
+                    return;
+                }
+                // Save parameter to local storage
+                if (localStorage.getItem("xslt-parameters")) {
+                    var parameters = JSON.parse(localStorage.getItem("xslt-parameters"));
+                    var update = false;
+                    $.each(parameters, function(n, v) {
+                        if (n === name) {
+                            parameters[n] = value;
+                            update = true;
+                            return false;
+                        }
+                    });
+                    if (!update) {
+                        parameters[name] = value;
+                    }
+                    localStorage.setItem("xslt-parameters", JSON.stringify(parameters));
+                } else {
+                    var parameters = {};
+                    parameters[name] = value;
+                    localStorage.setItem("xslt-parameters", JSON.stringify(parameters));
+                }
+            }
+
+            function submitXsltForm(evt) {
+                if ($("#result-format").val() === "text") {
+                    evt.preventDefault();
+                    $.when($.ajax({
+                        url: "execute",
+                        method: "POST",
+                        contentType: false,
+                        data: new FormData($("#xslt-form")[0]),
+                        processData: false,
+                    })).done(function(data) {
+                        $("#result").val(data);
+                    });
+                    return false;
+                }
+            }
+
+            function resetXsltForm(evt) {
+                evt.preventDefault();
+                localStorage.removeItem("xslt-parameters");
+                localStorage.removeItem("source-format");
+                localStorage.removeItem("source-text");
+                localStorage.removeItem("stylesheet-format");
+                localStorage.removeItem("stylesheet-text");
+                $("#source-format").val("text").change();
+                $("#stylesheet-format").val("text").change();
+                $("#parameters").empty();
+            }
+        </script>
+    </body>
+</html>
