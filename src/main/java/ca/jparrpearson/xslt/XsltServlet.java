@@ -34,6 +34,14 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 
+/**
+ * Servlet that executes an XSLT transformation by taking the XSLT (sytlesheet)
+ * and an input document (source). Any additional parameters passed to the
+ * servlet will be used as XSLT parameters.
+ * 
+ * @author Jeremy Parr-Pearson
+ *
+ */
 @WebServlet(name = "XsltServlet", urlPatterns = "/execute")
 @MultipartConfig
 public class XsltServlet extends HttpServlet {

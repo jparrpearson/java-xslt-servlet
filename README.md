@@ -42,12 +42,12 @@ An example `source document` and `xslt stylesheet` are provided.  Modify or prov
 
 Optional `parameters` may also be provided (name/value pairs), which will be passed to the XSLT.
 
-The resulting document can be viewed in the result text box, or in the browser iteslf (replaces the current page).
+The resulting document can be viewed in the result text box, or in the browser itself (replaces the current page).
 
 Note that all values in the form, with the exception of file references, will be preserved using the HTML5 `localStorage` object.  This means that even after navigating to other pages, or closing the browser, the values will remain in memory for next use.
 
 ## License
 
-Copyright (c) 2015 Jeremy Parr-Pearson
+Copyright (c) 2016 Jeremy Parr-Pearson
 
 The MIT License (MIT)
